@@ -143,6 +143,7 @@ func deleteCommonHeaders(call *models.ApiCall) {
 	delete(call.RequestHeader, "Cookie")
 	delete(call.RequestHeader, "Origin")
 	delete(call.RequestHeader, "User-Agent")
+	delete(call.RequestHeader, "Vary")
 }
 
 func IsStatusCodeValid(code int) bool {

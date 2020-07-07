@@ -27,10 +27,10 @@ var ReqWriteExcludeHeaderDump = map[string]bool{
 	"Transfer-Encoding":         true,
 	"Trailer":                   true,
 	"Accept-Encoding":           false,
-	"Accept-Language":           false,
-	"Cache-Control":             false,
+	"Accept-Language":           true,
+	"Cache-Control":             true,
 	"Connection":                false,
-	"Origin":                    false,
+	"Origin":                    true,
 	"User-Agent":                true,
 	"Dnt":                       true,
 	"Sec-Fetch-Dest":            true,
@@ -38,6 +38,8 @@ var ReqWriteExcludeHeaderDump = map[string]bool{
 	"Sec-Fetch-Site":            true,
 	"Sec-Fetch-User":            true,
 	"Upgrade-Insecure-Requests": true,
+	"Vary":                      true,
+	"Accept":                    true,
 }
 
 type YaagHandler struct {
