@@ -1,5 +1,7 @@
 package yaag
 
+import "github.com/xyzj/yaag/yaag/models"
+
 type Config struct {
 	On bool
 
@@ -7,4 +9,8 @@ type Config struct {
 
 	DocTitle string
 	DocPath  string
+}
+
+func (c *Config) ResetDoc() {
+	spec = &models.Spec{}
 }

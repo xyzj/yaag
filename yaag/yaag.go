@@ -11,7 +11,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/betacraft/yaag/yaag/models"
+	"github.com/xyzj/yaag/yaag/models"
 )
 
 var count int
@@ -30,7 +30,6 @@ func Init(conf *Config) {
 	if conf.DocPath == "" {
 		conf.DocPath = "apidoc.html"
 	}
-
 
 	filePath, err := filepath.Abs(conf.DocPath + ".json")
 	dataFile, err := os.Open(filePath)
@@ -55,18 +54,28 @@ func GenerateHtml(apiCall *models.ApiCall) {
 		if apiSpec.Path == apiCall.CurrentPath && apiSpec.HttpVerb == apiCall.MethodType {
 			shouldAddPathSpec = false
 			apiCall.Id = count
-			count += 1
+			count++
 			deleteCommonHeaders(apiCall)
-			avoid := false
-			for _, currentApiCall := range spec.ApiSpecs[k].Calls {
-				if apiCall.RequestBody == currentApiCall.RequestBody &&
-					apiCall.ResponseCode == currentApiCall.ResponseCode &&
-					apiCall.ResponseBody == currentApiCall.ResponseBody {
-					avoid = true
-				}
-			}
-			if !avoid {
+			// avoid := false
+			// for _, currentAPICall := range spec.ApiSpecs[k].Calls {
+			// 	if apiCall.RequestBody == currentAPICall.RequestBody &&
+			// 		apiCall.ResponseCode == currentAPICall.ResponseCode { // &&
+			// 		// apiCall.ResponseBody == currentAPICall.ResponseBody {
+			// 		avoid = true
+			// 	}
+			// }
+			// if !avoid {
+			// 	spec.ApiSpecs[k].Calls = append(apiSpec.Calls, *apiCall)
+			// } else {
+
+			// 	spec.ApiSpecs[k].Calls[0].RequestUrlParams = apiCall.RequestUrlParams
+			// 	spec.ApiSpecs[k].Calls[0].PostForm = apiCall.PostForm
+			// 	spec.ApiSpecs[k].Calls[0].ResponseBody = apiCall.ResponseBody
+			// }
+			if len(spec.ApiSpecs[k].Calls) == 0 {
 				spec.ApiSpecs[k].Calls = append(apiSpec.Calls, *apiCall)
+			} else {
+				spec.ApiSpecs[k].Calls[0] = *apiCall
 			}
 		}
 	}
@@ -77,7 +86,7 @@ func GenerateHtml(apiCall *models.ApiCall) {
 			Path:     apiCall.CurrentPath,
 		}
 		apiCall.Id = count
-		count += 1
+		count++
 		deleteCommonHeaders(apiCall)
 		apiSpec.Calls = append(apiSpec.Calls, *apiCall)
 		spec.ApiSpecs = append(spec.ApiSpecs, apiSpec)
@@ -105,7 +114,7 @@ func GenerateHtml(apiCall *models.ApiCall) {
 func generateHtml() {
 	funcs := template.FuncMap{"add": add, "mult": mult}
 	t := template.New("API Documentation").Funcs(funcs)
-	htmlString := Template
+	htmlString := TemplateLocal
 	t, err := t.Parse(htmlString)
 	if err != nil {
 		log.Println(err)
@@ -136,7 +145,7 @@ func deleteCommonHeaders(call *models.ApiCall) {
 	delete(call.RequestHeader, "User-Agent")
 }
 
-func IsStatusCodeValid(code int) bool  {
+func IsStatusCodeValid(code int) bool {
 	if code >= 200 && code < 300 {
 		return true
 	} else {

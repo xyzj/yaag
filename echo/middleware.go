@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"github.com/betacraft/yaag/middleware"
-	"github.com/betacraft/yaag/yaag"
-	"github.com/betacraft/yaag/yaag/models"
+	"github.com/xyzj/yaag/middleware"
+	"github.com/xyzj/yaag/yaag"
+	"github.com/xyzj/yaag/yaag/models"
 	"github.com/labstack/echo"
 )
 

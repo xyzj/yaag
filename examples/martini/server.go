@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/betacraft/yaag/martiniyaag"
-	"github.com/betacraft/yaag/yaag"
+	"github.com/xyzj/yaag/martiniyaag"
+	"github.com/xyzj/yaag/yaag"
 	"github.com/go-martini/martini"
 )
 

@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/betacraft/yaag.svg)](https://travis-ci.org/betacraft/yaag)
+[![Build Status](https://travis-ci.org/xyzj/yaag.svg)](https://travis-ci.org/xyzj/yaag)
 
 [Trello Board](https://trello.com/b/jCZlTsNj/yaag)
 
@@ -16,8 +16,8 @@ YAAG is a middleware. You have to add YAAG handler in your routes and you are do
 
 ## How to use with basic net.http package
 
-1. Import github.com/betacraft/yaag/yaag
-2. Import github.com/betacraft/yaag/middleware
+1. Import github.com/xyzj/yaag/yaag
+2. Import github.com/xyzj/yaag/middleware
 3. Initialize yaag ```yaag.Init(&yaag.Config{On: true, DocTitle: "Core", DocPath: "apidoc.html"})```
 4. Use it in your handlers as ```http.HandleFunc("/", middleware.HandleFunc(handler))```
 
@@ -36,8 +36,8 @@ func main() {
 ```
 
 ## How to use with Gorilla Mux
-1. Import github.com/betacraft/yaag/yaag
-2. Import github.com/betacraft/yaag/middleware
+1. Import github.com/xyzj/yaag/yaag
+2. Import github.com/xyzj/yaag/middleware
 3. Initialize yaag ```yaag.Init(&yaag.Config{On: true, DocTitle: "Gorilla Mux", DocPath: "apidoc.html"})```
 4. Use it in your handlers as ```r.HandleFunc("/", middleware.HandleFunc(handler))```
 
@@ -51,15 +51,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
   yaag.Init(&yaag.Config{On: true, DocTitle: "Gorilla Mux", DocPath: "apidoc.html"})
   r := mux.NewRouter()
-  r.HandleFunc("/", middleware.HandleFunc(handler)) 
+  r.HandleFunc("/", middleware.HandleFunc(handler))
   http.ListenAndServe(":8080", r)
 }
 ```
 
 ## How to use with Martini
 
-1. Import github.com/betacraft/yaag/yaag
-2. Import github.com/betacraft/yaag/martiniyaag
+1. Import github.com/xyzj/yaag/yaag
+2. Import github.com/xyzj/yaag/martiniyaag
 3. Initialize yaag ```yaag.Init(&yaag.Config{On: true, DocTitle: "Martini", DocPath: "apidoc.html"})```
 4. Add Yaag middleware like ```m.Use(martiniyaag.Document)```
 
@@ -80,7 +80,7 @@ func main() {
 ## How to use with Revel
 
 1. Add yaag.record = true in conf/app.conf (before starting to record the api calls)
-2. import github.com/betacraft/yaag/filters in app/init.go
+2. import github.com/xyzj/yaag/filters in app/init.go
 3. add 'filters.FilterForApiDoc' in revel.Filters
 4. Start recording Api calls
 
@@ -119,8 +119,8 @@ func init() {
 
 ## How to use with Gin
 
-1. Import github.com/betacraft/yaag/yaag
-2. Import github.com/betacraft/yaag/gin
+1. Import github.com/xyzj/yaag/yaag
+2. Import github.com/xyzj/yaag/gin
 3. Initialize yaag ```yaag.Init(&yaag.Config(On: true, DocTile: "Gin", DocPath: "apidpc.html"))```
 4. Add yaag middleware like ```r.User(yaag_gin.Document())```
 
@@ -129,8 +129,8 @@ func init() {
 ```go
 import (
     "net/http"
-    yaag_gin "github.com/betacraft/yaag/gin/v1"
-    "github.com/betacraft/yaag/yaag"
+    yaag_gin "github.com/xyzj/yaag/gin/v1"
+    "github.com/xyzj/yaag/yaag"
     "gopkg.in/gin-gonic/gin.v1"
     )
 func main() {
@@ -145,13 +145,13 @@ func main() {
 }
 ```
 
-### Using github for gin dependency 
+### Using github for gin dependency
 
 ```go
 import (
     "net/http"
-    yaag_gin "github.com/betacraft/yaag/gin"
-    "github.com/betacraft/yaag/yaag"
+    yaag_gin "github.com/xyzj/yaag/gin"
+    "github.com/xyzj/yaag/yaag"
     "github.com/gin-gonic/gin"
     )
 func main() {
@@ -169,8 +169,8 @@ func main() {
 
 ## How to use with Iris
 
-1. Import `github.com/betacraft/yaag/yaag`
-2. Import `github.com/betacraft/yaag/irisyaag`
+1. Import `github.com/xyzj/yaag/yaag`
+2. Import `github.com/xyzj/yaag/irisyaag`
 3. Initialize yaag `yaag.Init(&yaag.Config(On: true, DocTile: "Iris", DocPath: "apidoc.html"))`
 4. Register yaag middleware like `app.Use(irisyaag.New())`
 
@@ -185,8 +185,8 @@ import (
   "github.com/kataras/iris"
   "github.com/kataras/iris/context"
 
-  "github.com/betacraft/yaag/irisyaag"
-  "github.com/betacraft/yaag/yaag"
+  "github.com/xyzj/yaag/irisyaag"
+  "github.com/xyzj/yaag/yaag"
 )
 
 type myXML struct {
@@ -237,15 +237,15 @@ func main() {
 ## Screenshots
 
 #### API doc is generated based on the paths
-![alt first](https://raw.github.com/betacraft/yaag/master/1.png)
+![alt first](https://raw.github.com/xyzj/yaag/master/1.png)
 #### Click on any call to see the details of the API
-![alt second](https://raw.github.com/betacraft/yaag/master/2.png)
+![alt second](https://raw.github.com/xyzj/yaag/master/2.png)
 
 ## Screencast
 
 [YAAG ScreenCast](https://www.youtube.com/watch?v=dQWXxJn6_iE&feature=youtu.be)
 
-## Contributors 
+## Contributors
 
 * Aniket Awati (aniket@betacraft.co)
 * Akshay Deo (akshay@betacraft.co)

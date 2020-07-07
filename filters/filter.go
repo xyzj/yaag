@@ -3,15 +3,16 @@ package filters
 import (
 	"encoding/json"
 	"encoding/xml"
-	"github.com/betacraft/yaag/middleware"
-	"github.com/betacraft/yaag/yaag"
-	"github.com/betacraft/yaag/yaag/models"
-	"github.com/revel/revel"
 	"log"
-	"net/http/httptest"
-	"strings"
-	"net/url"
 	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strings"
+
+	"github.com/revel/revel"
+	"github.com/xyzj/yaag/middleware"
+	"github.com/xyzj/yaag/yaag"
+	"github.com/xyzj/yaag/yaag/models"
 )
 
 func FilterForApiDoc(c *revel.Controller, fc []revel.Filter) {
@@ -26,8 +27,8 @@ func FilterForApiDoc(c *revel.Controller, fc []revel.Filter) {
 	httpVerb := c.Request.Method
 	customParams := make(map[string]interface{})
 	headers := make(map[string]string)
-	hasJson := false
-	hasXml := false
+	hasJSON := false
+	hasXML := false
 	r := Route(rawrequest)
 	path := c.Request.URL.Path
 	if r != nil {
@@ -40,14 +41,14 @@ func FilterForApiDoc(c *revel.Controller, fc []revel.Filter) {
 			if err != nil {
 				log.Println("Json Error ! ", err)
 			} else {
-				hasJson = true
+				hasJSON = true
 			}
 		} else {
 			err := json.Unmarshal([]byte(c.Request.URL.RawQuery), &customParams)
 			if err != nil {
 				log.Println("Json Error ! ", err)
 			} else {
-				hasJson = true
+				hasJSON = true
 			}
 		}
 
@@ -57,18 +58,17 @@ func FilterForApiDoc(c *revel.Controller, fc []revel.Filter) {
 			if err != nil {
 				log.Println("Xml Error ! ", err)
 			} else {
-				hasXml = true
+				hasXML = true
 			}
 		} else {
 			err := xml.Unmarshal([]byte(c.Request.URL.RawQuery), &customParams)
 			if err != nil {
 				log.Println("Json Error ! ", err)
 			} else {
-				hasXml = true
+				hasXML = true
 			}
 		}
 	}
-	log.Println(hasJson, hasXml)
 	// call remaiing filters
 	fc[0](c, fc[1:])
 

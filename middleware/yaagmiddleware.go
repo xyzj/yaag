@@ -14,24 +14,30 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/betacraft/yaag/yaag"
-	"github.com/betacraft/yaag/yaag/models"
+	"github.com/xyzj/yaag/yaag"
+	"github.com/xyzj/yaag/yaag/models"
 )
 
-/* 32 MB in memory max */
-const MaxInMemoryMultipartSize = 32000000
+/* 64 MB in memory max */
+const MaxInMemoryMultipartSize = 67108864
 
-var reqWriteExcludeHeaderDump = map[string]bool{
-	"Host":              true, // not in Header map anyway
-	"Content-Length":    true,
-	"Transfer-Encoding": true,
-	"Trailer":           true,
-	"Accept-Encoding":   false,
-	"Accept-Language":   false,
-	"Cache-Control":     false,
-	"Connection":        false,
-	"Origin":            false,
-	"User-Agent":        false,
+var ReqWriteExcludeHeaderDump = map[string]bool{
+	"Host":                      true, // not in Header map anyway
+	"Content-Length":            true,
+	"Transfer-Encoding":         true,
+	"Trailer":                   true,
+	"Accept-Encoding":           false,
+	"Accept-Language":           false,
+	"Cache-Control":             false,
+	"Connection":                false,
+	"Origin":                    false,
+	"User-Agent":                true,
+	"Dnt":                       true,
+	"Sec-Fetch-Dest":            true,
+	"Sec-Fetch-Mode":            true,
+	"Sec-Fetch-Site":            true,
+	"Sec-Fetch-User":            true,
+	"Upgrade-Insecure-Requests": true,
 }
 
 type YaagHandler struct {
@@ -70,29 +76,25 @@ func HandleFunc(next func(http.ResponseWriter, *http.Request)) http.HandlerFunc 
 
 func Before(apiCall *models.ApiCall, req *http.Request) {
 	apiCall.RequestHeader = ReadHeaders(req)
-	apiCall.RequestUrlParams = ReadQueryParams(req)
-	val, ok := apiCall.RequestHeader["Content-Type"]
-	log.Println(val)
-	if ok {
-		ct := strings.TrimSpace(apiCall.RequestHeader["Content-Type"])
-		switch ct {
-		case "application/x-www-form-urlencoded":
-			fallthrough
-		case "application/json, application/x-www-form-urlencoded":
-			log.Println("Reading form")
-			apiCall.PostForm = ReadPostForm(req)
-		case "application/json":
-			log.Println("Reading body")
-			apiCall.RequestBody = *ReadBody(req)
-		default:
-			if strings.Contains(ct, "multipart/form-data") {
-				handleMultipart(apiCall, req)
-			} else {
-				log.Println("Reading body")
-				apiCall.RequestBody = *ReadBody(req)
-			}
-		}
-	}
+	// apiCall.RequestUrlParams = ReadQueryParams(req)
+	// val, ok := apiCall.RequestHeader["Content-Type"]
+	// if ok {
+	// 	ct := strings.TrimSpace(val)
+	// 	switch ct {
+	// 	case "application/x-www-form-urlencoded":
+	// 		fallthrough
+	// 	case "application/json, application/x-www-form-urlencoded":
+	// 		apiCall.PostForm = ReadPostForm(req)
+	// 	case "application/json":
+	// 		apiCall.RequestBody = *ReadBody(req)
+	// 	default:
+	// 		if strings.Contains(ct, "multipart/form-data") {
+	// 			handleMultipart(apiCall, req)
+	// 		} else {
+	// 			apiCall.RequestBody = *ReadBody(req)
+	// 		}
+	// 	}
+	// }
 }
 
 func ReadQueryParams(req *http.Request) map[string]string {
@@ -143,7 +145,7 @@ func ReadPostForm(req *http.Request) map[string]string {
 
 func ReadHeaders(req *http.Request) map[string]string {
 	b := bytes.NewBuffer([]byte(""))
-	err := req.Header.WriteSubset(b, reqWriteExcludeHeaderDump)
+	err := req.Header.WriteSubset(b, ReqWriteExcludeHeaderDump)
 	if err != nil {
 		return map[string]string{}
 	}
@@ -161,7 +163,6 @@ func ReadHeaders(req *http.Request) map[string]string {
 func ReadHeadersFromResponse(header http.Header) map[string]string {
 	headers := map[string]string{}
 	for k, v := range header {
-		log.Println(k, v)
 		headers[k] = strings.Join(v, " ")
 	}
 	return headers
@@ -197,7 +198,7 @@ func ReadBody(req *http.Request) *string {
 }
 
 func After(apiCall *models.ApiCall, record *responseRecorder, r *http.Request) {
-	if strings.Contains(r.RequestURI, ".ico") || !yaag.IsOn(){
+	if strings.Contains(r.RequestURI, ".ico") || !yaag.IsOn() {
 		return
 	}
 	apiCall.MethodType = r.Method

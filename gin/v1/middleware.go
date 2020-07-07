@@ -4,9 +4,9 @@ import (
 	"log"
 	"strings"
 
-	"github.com/betacraft/yaag/middleware"
-	"github.com/betacraft/yaag/yaag"
-	"github.com/betacraft/yaag/yaag/models"
+	"github.com/xyzj/yaag/middleware"
+	"github.com/xyzj/yaag/yaag"
+	"github.com/xyzj/yaag/yaag/models"
 	"gopkg.in/gin-gonic/gin.v1"
 )
 
@@ -25,7 +25,6 @@ func Document() gin.HandlerFunc {
 			apiCall.ResponseCode = c.Writer.Status()
 			headers := map[string]string{}
 			for k, v := range c.Writer.Header() {
-				log.Println(k, v)
 				headers[k] = strings.Join(v, " ")
 			}
 			apiCall.ResponseHeader = headers

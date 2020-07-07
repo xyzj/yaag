@@ -1,4 +1,4 @@
-module github.com/betacraft/yaag
+module github.com/xyzj/yaag
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
