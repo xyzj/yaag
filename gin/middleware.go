@@ -3,7 +3,6 @@ package gin
 import (
 	"bytes"
 	"encoding/json"
-	"net/url"
 	"strings"
 
 	"github.com/tidwall/gjson"
@@ -43,16 +42,17 @@ func Document() gin.HandlerFunc {
 		ct := c.Request.Header.Get("Content-Type")
 		switch ct {
 		case "", "application/x-www-form-urlencoded":
-			x, _ := url.ParseQuery(c.Request.URL.RawQuery)
-			for k, v := range x {
-				apiCall.RequestUrlParams[k] = v[0]
-			}
-			apiCall.RequestBody = gjson.Parse(c.Param("_body")).String()
-		case "application/json, application/x-www-form-urlencoded":
-			gjson.Parse(c.Param("_body")).ForEach(func(key gjson.Result, value gjson.Result) bool {
-				apiCall.PostForm[key.String()] = value.String()
-				return true
-			})
+			apiCall.RequestBody = "?" + strings.Split(c.Request.RequestURI, "?")[1]
+		// x, _ := url.ParseQuery(c.Request.URL.RawQuery)
+		// for k, v := range x {
+		// 	apiCall.RequestUrlParams[k] = v[0]
+		// }
+		// apiCall.RequestBody = gjson.Parse(c.Param("_body")).String()
+		// case "application/json, application/x-www-form-urlencoded":
+		// 	gjson.Parse(c.Param("_body")).ForEach(func(key gjson.Result, value gjson.Result) bool {
+		// 		apiCall.PostForm[key.String()] = value.String()
+		// 		return true
+		// 	})
 		default:
 			apiCall.RequestBody = gjson.Parse(c.Param("_body")).String()
 		}
