@@ -124,12 +124,12 @@ func generateHtml() {
 	if err != nil {
 		panic("Error while creating file path : " + err.Error())
 	}
-	homeHtmlFile, err := os.Create(filePath)
-	defer homeHtmlFile.Close()
+	homeHTMLFile, err := os.Create(filePath)
+	defer homeHTMLFile.Close()
 	if err != nil {
 		panic("Error while creating documentation file : " + err.Error())
 	}
-	homeWriter := io.Writer(homeHtmlFile)
+	homeWriter := io.Writer(homeHTMLFile)
 	t.Execute(homeWriter, map[string]interface{}{"array": spec.ApiSpecs,
 		"baseUrls": config.BaseUrls, "Title": config.DocTitle})
 }
@@ -146,6 +146,7 @@ func deleteCommonHeaders(call *models.ApiCall) {
 	delete(call.RequestHeader, "Vary")
 }
 
+// IsStatusCodeValid 检查状态码
 func IsStatusCodeValid(code int) bool {
 	if code >= 200 && code < 300 {
 		return true
