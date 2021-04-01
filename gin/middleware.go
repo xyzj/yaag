@@ -16,7 +16,7 @@ import (
 // Document 生成api文档中间件
 func Document() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if !yaag.IsOn() || strings.Index(c.Request.RequestURI, "/api") >= 0 {
+		if !yaag.IsOn() || strings.Contains(c.Request.RequestURI, "/api") {
 			return
 		}
 		apiCall := &models.ApiCall{
@@ -42,7 +42,7 @@ func Document() gin.HandlerFunc {
 		ct := c.Request.Header.Get("Content-Type")
 		switch ct {
 		case "", "application/x-www-form-urlencoded":
-			if strings.Index(c.Request.RequestURI, "?") >= 0 {
+			if !strings.Contains(c.Request.RequestURI, "?") {
 				apiCall.RequestBody = ""
 			} else {
 				apiCall.RequestBody = "?" + strings.Split(c.Request.RequestURI, "?")[1]

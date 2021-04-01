@@ -31,13 +31,13 @@ func Init(conf *Config) {
 		conf.DocPath = "apidoc.html"
 	}
 
-	filePath, err := filepath.Abs(conf.DocPath + ".json")
+	filePath, _ := filepath.Abs(conf.DocPath + ".json")
 	dataFile, err := os.Open(filePath)
-	defer dataFile.Close()
 	if err == nil {
 		json.NewDecoder(io.Reader(dataFile)).Decode(spec)
 		generateHtml()
 	}
+	defer dataFile.Close()
 }
 
 func add(x, y int) int {
@@ -91,7 +91,7 @@ func GenerateHtml(apiCall *models.ApiCall) {
 		apiSpec.Calls = append(apiSpec.Calls, *apiCall)
 		spec.ApiSpecs = append(spec.ApiSpecs, apiSpec)
 	}
-	filePath, err := filepath.Abs(config.DocPath)
+	filePath, _ := filepath.Abs(config.DocPath)
 	dataFile, err := os.Create(filePath + ".json")
 	if err != nil {
 		log.Println(err)
@@ -125,10 +125,10 @@ func generateHtml() {
 		panic("Error while creating file path : " + err.Error())
 	}
 	homeHTMLFile, err := os.Create(filePath)
-	defer homeHTMLFile.Close()
 	if err != nil {
 		panic("Error while creating documentation file : " + err.Error())
 	}
+	defer homeHTMLFile.Close()
 	homeWriter := io.Writer(homeHTMLFile)
 	t.Execute(homeWriter, map[string]interface{}{"array": spec.ApiSpecs,
 		"baseUrls": config.BaseUrls, "Title": config.DocTitle})

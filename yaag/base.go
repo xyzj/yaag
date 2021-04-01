@@ -220,13 +220,13 @@ const (
 <head lang="en">
     <meta charset="UTF-8">
     <title> API Documentation </title>
-    <link rel="stylesheet" href="/static/apirecord/bootstrap.min.css">
-    <link href='/static/apirecord/roboto.css' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="/apirec/yaag/bootstrap.min.css">
+    <link href='/apirec/yaag/roboto.css' rel='stylesheet' type='text/css'>
     <!-- Optional theme -->
-    <link rel="stylesheet" href="/static/apirecord/bootstrap-theme.min.css">
-    <script src="/static/apirecord/jquery-2.1.3.min.js"></script>
+    <link rel="stylesheet" href="/apirec/yaag/bootstrap-theme.min.css">
+    <script src="/apirec/yaag/jquery-2.1.3.min.js"></script>
     <!-- Latest compiled and minified JavaScript -->
-    <script src="/static/apirecord/bootstrap.min.js"></script>
+    <script src="/apirec/yaag/bootstrap.min.js"></script>
     <style type="text/css">
         body {
             font-family: 'Roboto', sans-serif;
