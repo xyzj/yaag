@@ -3,17 +3,19 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/xyzj/yaag/yaag/models"
 	"net/http"
 	"net/http/httptest"
-	"testing"
-	"github.com/gorilla/websocket"
-	"github.com/xyzj/yaag/yaag"
-	"strings"
 	"os"
+	"strings"
+	"testing"
+
+	"github.com/gorilla/websocket"
+	"github.com/xyzj/gopsu"
+	"github.com/xyzj/yaag/yaag"
+	"github.com/xyzj/yaag/yaag/models"
 )
 
-func TestMain(m *testing.M)  {
+func TestMain(m *testing.M) {
 	yaag.Init(&yaag.Config{
 		On:       true,
 		DocTitle: "Test",
@@ -88,13 +90,13 @@ func TestWithWebsocketUpgrade(t *testing.T) {
 	}
 	s := httptest.NewServer(HandleFunc(next))
 	c, _, err := websocket.DefaultDialer.Dial(strings.Replace(
-		s.URL, "http","ws",1,
+		s.URL, "http", "ws", 1,
 	), nil)
 	if err != nil {
 		t.Fatal("dial:", err)
 	}
 	defer c.Close()
-	err = c.WriteMessage(websocket.TextMessage, []byte("hello\n"))
+	err = c.WriteMessage(websocket.TextMessage, gopsu.Bytes("hello\n"))
 	if err != nil {
 		t.Log("write:", err)
 		return
@@ -104,7 +106,7 @@ func TestWithWebsocketUpgrade(t *testing.T) {
 		t.Fatalf("read: %s", err)
 		return
 	}
-	if string(message) != "hello\n" {
+	if gopsu.String(message) != "hello\n" {
 		t.Fatal("Message doesn't match")
 	}
 }

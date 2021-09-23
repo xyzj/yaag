@@ -8,6 +8,7 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/gin-gonic/gin"
+	"github.com/xyzj/gopsu"
 	"github.com/xyzj/yaag/middleware"
 	"github.com/xyzj/yaag/yaag"
 	"github.com/xyzj/yaag/yaag/models"
@@ -70,7 +71,7 @@ func Document() gin.HandlerFunc {
 				if err != nil {
 					body = ""
 				} else {
-					body = string(jsonBytes)
+					body = gopsu.String(jsonBytes)
 				}
 			}
 			apiCall.ResponseBody = body
