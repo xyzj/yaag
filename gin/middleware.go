@@ -27,7 +27,7 @@ func Document() gin.HandlerFunc {
 			ResponseHeader:   make(map[string]string),
 		}
 		// header
-		b := bytes.NewBuffer([]byte(""))
+		b := bytes.NewBuffer(gopsu.Bytes(""))
 		err := c.Request.Header.WriteSubset(b, middleware.ReqWriteExcludeHeaderDump)
 		if err != nil {
 			apiCall.RequestHeader = make(map[string]string)

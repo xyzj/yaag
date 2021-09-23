@@ -7,13 +7,13 @@ import (
 	"bytes"
 	"io"
 	"io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 
+	"github.com/xyzj/gopsu"
 	"github.com/xyzj/yaag/yaag"
 	"github.com/xyzj/yaag/yaag/models"
 )
@@ -116,17 +116,17 @@ func ReadQueryParams(req *http.Request) map[string]string {
 	return params
 }
 
-func printMap(m map[string]string) {
-	for key, value := range m {
-		log.Println(key, "=>", value)
-	}
-}
+// func printMap(m map[string]string) {
+// 	for key, value := range m {
+// 		log.Println(key, "=>", value)
+// 	}
+// }
 
-func handleMultipart(apiCall *models.ApiCall, req *http.Request) {
-	apiCall.RequestHeader["Content-Type"] = "multipart/form-data"
-	req.ParseMultipartForm(MaxInMemoryMultipartSize)
-	apiCall.PostForm = ReadMultiPostForm(req.MultipartForm)
-}
+// func handleMultipart(apiCall *models.ApiCall, req *http.Request) {
+// 	apiCall.RequestHeader["Content-Type"] = "multipart/form-data"
+// 	req.ParseMultipartForm(MaxInMemoryMultipartSize)
+// 	apiCall.PostForm = ReadMultiPostForm(req.MultipartForm)
+// }
 
 func ReadMultiPostForm(mpForm *multipart.Form) map[string]string {
 	postForm := map[string]string{}
@@ -146,7 +146,7 @@ func ReadPostForm(req *http.Request) map[string]string {
 }
 
 func ReadHeaders(req *http.Request) map[string]string {
-	b := bytes.NewBuffer([]byte(""))
+	b := bytes.NewBuffer(gopsu.Bytes(""))
 	err := req.Header.WriteSubset(b, ReqWriteExcludeHeaderDump)
 	if err != nil {
 		return map[string]string{}
@@ -181,7 +181,7 @@ func ReadBody(req *http.Request) *string {
 			return nil
 		}
 	}
-	b := bytes.NewBuffer([]byte(""))
+	b := bytes.NewBuffer(gopsu.Bytes(""))
 	chunked := len(req.TransferEncoding) > 0 && req.TransferEncoding[0] == "chunked"
 	if req.Body == nil {
 		return nil
@@ -190,7 +190,7 @@ func ReadBody(req *http.Request) *string {
 	if chunked {
 		dest = httputil.NewChunkedWriter(dest)
 	}
-	_, err = io.Copy(dest, req.Body)
+	io.Copy(dest, req.Body)
 	if chunked {
 		dest.(io.Closer).Close()
 	}
