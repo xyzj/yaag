@@ -238,7 +238,22 @@ const (
             outline: 1px solid #ccc;
             padding: 5px; margin: 5px;
         }
-
+        hr {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border-right-style: initial;
+            border-bottom-style: initial;
+            border-left-style: initial;
+            border-right-color: initial;
+            border-bottom-color: initial;
+            border-left-color: initial;
+            border-width: 1px 0px 0px;
+            border-image: initial;
+            border-top: 1px solid rgb(127, 179, 213);
+            border-top-width: 10px;
+            border-top-style: solid;
+            border-top-color: rgb(127, 179, 213);
+        }
         .string { color: green; }
         .number { color: darkorange; }
         .boolean { color: blue; }

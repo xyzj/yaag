@@ -4,21 +4,27 @@
 package yaag
 
 import (
-	"encoding/json"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/xyzj/yaag/yaag/models"
 )
 
-var count int
+var count uint64
 var config *Config
+
+var json = jsoniter.Config{}.Froze()
 
 // Initial empty spec
 var spec *models.Spec = &models.Spec{}
+var htmlTemplate *template.Template
+var htmlFile string
 
 func IsOn() bool {
 	return config.On
@@ -29,6 +35,20 @@ func Init(conf *Config) {
 	// load the config file
 	if conf.DocPath == "" {
 		conf.DocPath = "apidoc.html"
+	}
+	var err error
+	// 模板
+	funcs := template.FuncMap{"add": add, "mult": mult}
+	t := template.New("API Documentation").Funcs(funcs)
+	htmlString := TemplateLocal
+	htmlTemplate, err = t.Parse(htmlString)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	htmlFile, err = filepath.Abs(conf.DocPath)
+	if err != nil {
+		panic("Error while creating file path : " + err.Error())
 	}
 
 	filePath, _ := filepath.Abs(conf.DocPath + ".json")
@@ -50,12 +70,21 @@ func mult(x, y int) int {
 
 func GenerateHtml(apiCall *models.ApiCall) {
 	shouldAddPathSpec := true
+	deleteCommonHeaders(apiCall)
 	for k, apiSpec := range spec.ApiSpecs {
 		if apiSpec.Path == apiCall.CurrentPath && apiSpec.HttpVerb == apiCall.MethodType {
 			shouldAddPathSpec = false
-			apiCall.Id = count
-			count++
-			deleteCommonHeaders(apiCall)
+			found := false
+			for _, call := range apiSpec.Calls {
+				if call.CallHash == apiCall.CallHash {
+					found = true
+					break
+				}
+			}
+			if found {
+				break
+			}
+			apiCall.Id = atomic.AddUint64(&count, 1)
 			// avoid := false
 			// for _, currentAPICall := range spec.ApiSpecs[k].Calls {
 			// 	if apiCall.RequestBody == currentAPICall.RequestBody &&
@@ -72,11 +101,12 @@ func GenerateHtml(apiCall *models.ApiCall) {
 			// 	spec.ApiSpecs[k].Calls[0].PostForm = apiCall.PostForm
 			// 	spec.ApiSpecs[k].Calls[0].ResponseBody = apiCall.ResponseBody
 			// }
-			if len(spec.ApiSpecs[k].Calls) == 0 {
-				spec.ApiSpecs[k].Calls = append(apiSpec.Calls, *apiCall)
-			} else {
-				spec.ApiSpecs[k].Calls[0] = *apiCall
-			}
+			// if len(spec.ApiSpecs[k].Calls) == 0 {
+			spec.ApiSpecs[k].Calls = append(apiSpec.Calls, *apiCall)
+			break
+			// } else {
+			// 	spec.ApiSpecs[k].Calls[0] = *apiCall
+			// }
 		}
 	}
 
@@ -85,52 +115,25 @@ func GenerateHtml(apiCall *models.ApiCall) {
 			HttpVerb: apiCall.MethodType,
 			Path:     apiCall.CurrentPath,
 		}
-		apiCall.Id = count
-		count++
-		deleteCommonHeaders(apiCall)
+		apiCall.Id = atomic.AddUint64(&count, 1)
 		apiSpec.Calls = append(apiSpec.Calls, *apiCall)
 		spec.ApiSpecs = append(spec.ApiSpecs, apiSpec)
 	}
 	filePath, _ := filepath.Abs(config.DocPath)
-	dataFile, err := os.Create(filePath + ".json")
-	if err != nil {
-		log.Println(err)
-		return
+	if b, err := json.Marshal(spec); err == nil {
+		ioutil.WriteFile(filePath+".json", b, 0664)
+		generateHtml()
 	}
-	defer dataFile.Close()
-	data, err := json.Marshal(spec)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	_, err = dataFile.Write(data)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	generateHtml()
 }
 
 func generateHtml() {
-	funcs := template.FuncMap{"add": add, "mult": mult}
-	t := template.New("API Documentation").Funcs(funcs)
-	htmlString := TemplateLocal
-	t, err := t.Parse(htmlString)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	filePath, err := filepath.Abs(config.DocPath)
-	if err != nil {
-		panic("Error while creating file path : " + err.Error())
-	}
-	homeHTMLFile, err := os.Create(filePath)
+	homeHTMLFile, err := os.Create(htmlFile)
 	if err != nil {
 		panic("Error while creating documentation file : " + err.Error())
 	}
 	defer homeHTMLFile.Close()
 	homeWriter := io.Writer(homeHTMLFile)
-	t.Execute(homeWriter, map[string]interface{}{"array": spec.ApiSpecs,
+	htmlTemplate.Execute(homeWriter, map[string]interface{}{"array": spec.ApiSpecs,
 		"baseUrls": config.BaseUrls, "Title": config.DocTitle})
 }
 
@@ -150,7 +153,6 @@ func deleteCommonHeaders(call *models.ApiCall) {
 func IsStatusCodeValid(code int) bool {
 	if code >= 200 && code < 300 {
 		return true
-	} else {
-		return false
 	}
+	return false
 }

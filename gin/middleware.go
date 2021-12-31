@@ -2,17 +2,19 @@ package gin
 
 import (
 	"bytes"
-	"encoding/json"
+	"hash/crc32"
+	"strconv"
 	"strings"
 
-	"github.com/tidwall/gjson"
-
 	"github.com/gin-gonic/gin"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/xyzj/gopsu"
 	"github.com/xyzj/yaag/middleware"
 	"github.com/xyzj/yaag/yaag"
 	"github.com/xyzj/yaag/yaag/models"
 )
+
+var json = jsoniter.Config{}.Froze()
 
 // Document 生成api文档中间件
 func Document() gin.HandlerFunc {
@@ -25,6 +27,8 @@ func Document() gin.HandlerFunc {
 			PostForm:         make(map[string]string),
 			RequestUrlParams: make(map[string]string),
 			ResponseHeader:   make(map[string]string),
+			MethodType:       c.Request.Method,
+			CurrentPath:      strings.Split(c.Request.RequestURI, "?")[0],
 		}
 		// header
 		b := bytes.NewBuffer(gopsu.Bytes(""))
@@ -59,12 +63,11 @@ func Document() gin.HandlerFunc {
 		// 		return true
 		// 	})
 		default:
-			apiCall.RequestBody = gjson.Parse(c.Param("_body")).String()
+			apiCall.RequestBody = c.Param("_body")
 		}
+		apiCall.CallHash = strconv.FormatUint(uint64(crc32.ChecksumIEEE([]byte(apiCall.CurrentPath+apiCall.MethodType+apiCall.RequestBody))), 16)
 		c.Next()
 		if yaag.IsStatusCodeValid(c.Writer.Status()) {
-			apiCall.MethodType = c.Request.Method
-			apiCall.CurrentPath = strings.Split(c.Request.RequestURI, "?")[0]
 			var body string
 			if len(c.Keys) > 0 {
 				jsonBytes, err := json.Marshal(c.Keys)

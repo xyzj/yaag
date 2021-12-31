@@ -1,7 +1,7 @@
 package models
 
 type ApiCall struct {
-	Id int
+	Id uint64
 
 	CurrentPath string
 	MethodType  string
@@ -16,4 +16,5 @@ type ApiCall struct {
 	RequestBody  string
 	ResponseBody string
 	ResponseCode int
+	CallHash     string
 }
