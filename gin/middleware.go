@@ -7,14 +7,12 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/xyzj/gopsu"
+	json "github.com/xyzj/gopsu/json"
 	"github.com/xyzj/yaag/middleware"
 	"github.com/xyzj/yaag/yaag"
 	"github.com/xyzj/yaag/yaag/models"
 )
-
-var json = jsoniter.Config{}.Froze()
 
 // Document 生成api文档中间件
 func Document() gin.HandlerFunc {

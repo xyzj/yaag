@@ -12,14 +12,12 @@ import (
 	"path/filepath"
 	"sync/atomic"
 
-	jsoniter "github.com/json-iterator/go"
+	json "github.com/xyzj/gopsu/json"
 	"github.com/xyzj/yaag/yaag/models"
 )
 
 var count uint64
 var config *Config
-
-var json = jsoniter.Config{}.Froze()
 
 // Initial empty spec
 var spec *models.Spec = &models.Spec{}
