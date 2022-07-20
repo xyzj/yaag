@@ -1,5 +1,6 @@
 package yaag
 
+// CommonHeaders 公共头
 var CommonHeaders = []string{
 	"Accept",
 	"Accept-Encoding",

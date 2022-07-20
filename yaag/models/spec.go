@@ -1,5 +1,6 @@
 package models
 
+// Spec Spec
 type Spec struct {
-	ApiSpecs []ApiSpec
+	APISpecs []*APISpec
 }

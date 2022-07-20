@@ -1,6 +1,7 @@
 package yaag
 
 const (
+	// Template 模板
 	Template = `<!DOCTYPE html>
 <html>
 <head lang="en">
@@ -214,7 +215,7 @@ const (
 <hr>
 </body>
 </html>`
-
+	// TemplateLocal 本地模板
 	TemplateLocal = `<!DOCTYPE html>
 <html>
 <head lang="en">

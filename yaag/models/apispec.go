@@ -1,7 +1,8 @@
 package models
 
-type ApiSpec struct {
+type APISpec struct {
+	Idx      int
 	HttpVerb string
 	Path     string
-	Calls    []ApiCall
+	Calls    []*ApiCall
 }

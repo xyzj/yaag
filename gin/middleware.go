@@ -2,8 +2,6 @@ package gin
 
 import (
 	"bytes"
-	"hash/crc32"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -12,6 +10,10 @@ import (
 	"github.com/xyzj/yaag/middleware"
 	"github.com/xyzj/yaag/yaag"
 	"github.com/xyzj/yaag/yaag/models"
+)
+
+var (
+	hashWorker = gopsu.GetNewCryptoWorker(gopsu.CryptoMD5)
 )
 
 // Document 生成api文档中间件
@@ -50,20 +52,10 @@ func Document() gin.HandlerFunc {
 			} else {
 				apiCall.RequestBody = "?" + strings.Split(c.Request.RequestURI, "?")[1]
 			}
-		// x, _ := url.ParseQuery(c.Request.URL.RawQuery)
-		// for k, v := range x {
-		// 	apiCall.RequestUrlParams[k] = v[0]
-		// }
-		// apiCall.RequestBody = gjson.Parse(c.Param("_body")).String()
-		// case "application/json, application/x-www-form-urlencoded":
-		// 	gjson.Parse(c.Param("_body")).ForEach(func(key gjson.Result, value gjson.Result) bool {
-		// 		apiCall.PostForm[key.String()] = value.String()
-		// 		return true
-		// 	})
 		default:
 			apiCall.RequestBody = c.Param("_body")
 		}
-		apiCall.CallHash = strconv.FormatUint(uint64(crc32.ChecksumIEEE([]byte(apiCall.CurrentPath+apiCall.MethodType+apiCall.RequestBody))), 16)
+		apiCall.CallHash = hashWorker.Hash([]byte(apiCall.CurrentPath + apiCall.MethodType + apiCall.RequestBody))
 		c.Next()
 		if yaag.IsStatusCodeValid(c.Writer.Status()) {
 			var body string
@@ -82,7 +74,8 @@ func Document() gin.HandlerFunc {
 				headers[k] = strings.Join(v, " ")
 			}
 			apiCall.ResponseHeader = headers
-			go yaag.GenerateHtml(apiCall)
+			yaag.SetGenHTML(apiCall)
+			// go yaag.GenerateHTML(apiCall)
 		}
 	}
 }
