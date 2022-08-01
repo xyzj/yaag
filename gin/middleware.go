@@ -43,6 +43,8 @@ func Document() gin.HandlerFunc {
 			}
 			apiCall.RequestHeader[values[0]] = values[1]
 		}
+		// apiCall.CallHash = hashWorker.Hash([]byte(apiCall.CurrentPath + apiCall.MethodType + apiCall.RequestBody))
+		c.Next()
 		// request params
 		ct := c.Request.Header.Get("Content-Type")
 		switch ct {
@@ -55,8 +57,6 @@ func Document() gin.HandlerFunc {
 		default:
 			apiCall.RequestBody = c.Param("_body")
 		}
-		apiCall.CallHash = hashWorker.Hash([]byte(apiCall.CurrentPath + apiCall.MethodType + apiCall.RequestBody))
-		c.Next()
 		if yaag.IsStatusCodeValid(c.Writer.Status()) {
 			var body string
 			if len(c.Keys) > 0 {

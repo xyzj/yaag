@@ -26,7 +26,7 @@ var ReqWriteExcludeHeaderDump = map[string]bool{
 	"Content-Length":            true,
 	"Transfer-Encoding":         true,
 	"Trailer":                   true,
-	"Accept-Encoding":           false,
+	"Accept-Encoding":           true,
 	"Accept-Language":           true,
 	"Cache-Control":             true,
 	"Connection":                false,

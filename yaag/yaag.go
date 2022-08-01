@@ -22,6 +22,7 @@ var config *Config
 var spec *models.Spec = &models.Spec{}
 var htmlTemplate *template.Template
 var htmlFile string
+var dataFile string
 var chanGenHTML = make(chan *models.ApiCall, 1000)
 
 // IsOn 是否启用
@@ -34,44 +35,56 @@ func Init(conf *Config) {
 	config = conf
 	// load the config file
 	if conf.DocPath == "" {
-		conf.DocPath = "apidoc.html"
+		conf.DocPath = "apirecord.html"
 	}
 	var err error
+	htmlTemplate, _ = template.New("apirec").Parse(TemplateLocal)
+	// t, _ := template.New("runtime").Parse(TPLHEAD + TPLCSS + TPLBODY)
+	// h := render.HTML{
+	// 	Name:     "runtime",
+	// 	Data:     statusInfo,
+	// 	Template: t,
+	// }
+	// h.WriteContentType(c.Writer)
+	// h.Render(c.Writer)
 	// 模板
-	funcs := template.FuncMap{"add": add, "mult": mult}
-	t := template.New("API Documentation").Funcs(funcs)
-	htmlString := TemplateLocal
-	htmlTemplate, err = t.Parse(htmlString)
-	if err != nil {
-		println(err.Error())
-		return
-	}
+	// funcs := template.FuncMap{"add": add, "mult": mult}
+	// t := template.New("API Documentation").Funcs(funcs)
+	// htmlString := TemplateLocal
+	// htmlTemplate, err = t.Parse(htmlString)
+	// if err != nil {
+	// 	println(err.Error())
+	// 	return
+	// }
 	htmlFile, err = filepath.Abs(conf.DocPath)
 	if err != nil {
 		println(err.Error())
 		return
 	}
-
-	filePath, _ := filepath.Abs(conf.DocPath + ".json")
-	dataFile, err := os.Open(filePath)
+	dataFile = htmlFile + ".json"
+	b, err := ioutil.ReadFile(dataFile)
 	if err == nil {
-		json.NewDecoder(io.Reader(dataFile)).Decode(spec)
-		generateHTML()
+		json.Unmarshal(b, spec)
 	}
-	defer dataFile.Close()
+	for k, v := range spec.APISpecs {
+		for idx, c := range v.Calls {
+			if &c != nil {
+				spec.APISpecs[k].Idx = idx
+				break
+			}
+		}
+	}
+	// f, err := os.Open(dataFile)
+	// if err == nil {
+	// 	json.NewDecoder(io.Reader(f)).Decode(spec)
+	// 	generateHTML()
+	// }
+	// defer dataFile.Close()
 	go loopfunc.LoopFunc(func(params ...interface{}) {
 		for apicall := range chanGenHTML {
 			GenerateHTML(apicall)
 		}
 	})
-}
-
-func add(x, y int) int {
-	return x + y
-}
-
-func mult(x, y int) int {
-	return (x + 1) * y
 }
 
 // SetGenHTML SetGenHTML
@@ -86,18 +99,18 @@ func GenerateHTML(apiCall *models.ApiCall) {
 	for k, apiSpec := range spec.APISpecs {
 		if apiSpec.Path == apiCall.CurrentPath && apiSpec.HttpVerb == apiCall.MethodType {
 			shouldAddPathSpec = false
-			found := false
-			for _, call := range apiSpec.Calls {
-				if call.CallHash == apiCall.CallHash {
-					found = true
-					break
-				}
-			}
-			if found {
-				break
-			}
-			if apiSpec.Idx >= 20 {
-				apiSpec.Idx = -1
+			// found := false
+			// for _, call := range apiSpec.Calls {
+			// 	if call.CallHash == apiCall.CallHash {
+			// 		found = true
+			// 		break
+			// 	}
+			// }
+			// if found {
+			// 	break
+			// }
+			if apiSpec.Idx >= 10 {
+				spec.APISpecs[k].Idx = -1
 			}
 			// apiCall.Id = atomic.AddUint64(&count, 1)
 			// avoid := false
@@ -118,8 +131,8 @@ func GenerateHTML(apiCall *models.ApiCall) {
 			// }
 			// if len(spec.APISpecs[k].Calls) == 0 {
 			// spec.APISpecs[k].Calls = append(apiSpec.Calls, apiCall)
-			apiSpec.Idx++
-			spec.APISpecs[k].Calls[apiSpec.Idx] = apiCall
+			spec.APISpecs[k].Idx++
+			spec.APISpecs[k].Calls[apiSpec.Idx] = *apiCall
 			break
 			// } else {
 			// 	spec.APISpecs[k].Calls[0] = *apiCall
@@ -132,17 +145,17 @@ func GenerateHTML(apiCall *models.ApiCall) {
 			Idx:      0,
 			HttpVerb: apiCall.MethodType,
 			Path:     apiCall.CurrentPath,
-			Calls:    make([]*models.ApiCall, 20),
+			Calls:    make([]models.ApiCall, 10),
 		}
 		// apiCall.Id = atomic.AddUint64(&count, 1)
 		// apiSpec.Calls = append(apiSpec.Calls, apiCall)
-		apiSpec.Calls[0] = apiCall
-		spec.APISpecs = append(spec.APISpecs, apiSpec)
+		apiSpec.Calls[0] = *apiCall
+		spec.APISpecs = append(spec.APISpecs, *apiSpec)
 	}
+	generateHTML()
 	filePath, _ := filepath.Abs(config.DocPath)
 	if b, err := json.Marshal(spec); err == nil {
 		ioutil.WriteFile(filePath+".json", b, 0664)
-		generateHTML()
 	}
 }
 
@@ -153,8 +166,12 @@ func generateHTML() {
 	}
 	defer homeHTMLFile.Close()
 	homeWriter := io.Writer(homeHTMLFile)
-	htmlTemplate.Execute(homeWriter, map[string]interface{}{"array": spec.APISpecs,
-		"baseUrls": config.BaseUrls, "Title": config.DocTitle})
+	htmlTemplate.Execute(homeWriter,
+		map[string]interface{}{
+			"array":    spec.APISpecs,
+			"baseUrls": config.BaseUrls,
+			"Title":    config.DocTitle,
+		})
 }
 
 func deleteCommonHeaders(call *models.ApiCall) {
@@ -166,7 +183,11 @@ func deleteCommonHeaders(call *models.ApiCall) {
 	delete(call.RequestHeader, "Cookie")
 	delete(call.RequestHeader, "Origin")
 	delete(call.RequestHeader, "User-Agent")
+	delete(call.RequestHeader, "Postman-Token")
+	delete(call.RequestHeader, "User-Token")
 	delete(call.RequestHeader, "Vary")
+	delete(call.ResponseHeader, "Content-Encoding")
+	delete(call.ResponseHeader, "Vary")
 }
 
 // IsStatusCodeValid 检查状态码
