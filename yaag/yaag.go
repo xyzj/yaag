@@ -84,7 +84,7 @@ func Init(conf *Config) {
 		for apicall := range chanGenHTML {
 			GenerateHTML(apicall)
 		}
-	})
+	}, "genhtml", nil)
 }
 
 // SetGenHTML SetGenHTML
