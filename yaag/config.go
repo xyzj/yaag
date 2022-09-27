@@ -4,12 +4,11 @@ import "github.com/xyzj/yaag/yaag/models"
 
 // Config 配置
 type Config struct {
-	On bool
-
 	BaseUrls map[string]string
-
 	DocTitle string
 	DocPath  string
+	DocDir   string
+	On       bool
 }
 
 // ResetDoc 重置

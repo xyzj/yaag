@@ -8,9 +8,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 
-	json "github.com/xyzj/gopsu/json"
+	"github.com/xyzj/gopsu/json"
 	"github.com/xyzj/gopsu/loopfunc"
 	"github.com/xyzj/yaag/yaag/models"
 )
@@ -23,7 +22,7 @@ var spec *models.Spec = &models.Spec{}
 var htmlTemplate *template.Template
 var htmlFile string
 var dataFile string
-var chanGenHTML = make(chan *models.ApiCall, 1000)
+var chanGenHTML = make(chan *models.APICall, 1000)
 
 // IsOn 是否启用
 func IsOn() bool {
@@ -38,7 +37,7 @@ func Init(conf *Config) {
 		conf.DocPath = "apirecord.html"
 	}
 	var err error
-	htmlTemplate, _ = template.New("apirec").Parse(TemplateLocal)
+	htmlTemplate, _ = template.New("apirec").Parse(Template)
 	// t, _ := template.New("runtime").Parse(TPLHEAD + TPLCSS + TPLBODY)
 	// h := render.HTML{
 	// 	Name:     "runtime",
@@ -56,19 +55,15 @@ func Init(conf *Config) {
 	// 	println(err.Error())
 	// 	return
 	// }
-	htmlFile, err = filepath.Abs(conf.DocPath)
-	if err != nil {
-		println(err.Error())
-		return
-	}
-	dataFile = htmlFile + ".json"
+	dataFile = conf.DocPath + ".json"
+	htmlFile = conf.DocPath
 	b, err := ioutil.ReadFile(dataFile)
 	if err == nil {
 		json.Unmarshal(b, spec)
 	}
 	for k, v := range spec.APISpecs {
-		for idx, c := range v.Calls {
-			if &c != nil {
+		for idx, call := range v.Calls {
+			if call.RequestHeader == nil {
 				spec.APISpecs[k].Idx = idx
 				break
 			}
@@ -88,16 +83,16 @@ func Init(conf *Config) {
 }
 
 // SetGenHTML SetGenHTML
-func SetGenHTML(apicall *models.ApiCall) {
+func SetGenHTML(apicall *models.APICall) {
 	chanGenHTML <- apicall
 }
 
 // GenerateHTML 生成html
-func GenerateHTML(apiCall *models.ApiCall) {
+func GenerateHTML(apiCall *models.APICall) {
 	shouldAddPathSpec := true
-	deleteCommonHeaders(apiCall)
+	// deleteCommonHeaders(apiCall)
 	for k, apiSpec := range spec.APISpecs {
-		if apiSpec.Path == apiCall.CurrentPath && apiSpec.HttpVerb == apiCall.MethodType {
+		if apiSpec.Path == apiCall.CurrentPath && apiSpec.MethodType == apiCall.MethodType {
 			shouldAddPathSpec = false
 			// found := false
 			// for _, call := range apiSpec.Calls {
@@ -110,7 +105,7 @@ func GenerateHTML(apiCall *models.ApiCall) {
 			// 	break
 			// }
 			if apiSpec.Idx >= 10 {
-				spec.APISpecs[k].Idx = -1
+				spec.APISpecs[k].Idx = 0
 			}
 			// apiCall.Id = atomic.AddUint64(&count, 1)
 			// avoid := false
@@ -125,14 +120,14 @@ func GenerateHTML(apiCall *models.ApiCall) {
 			// 	spec.APISpecs[k].Calls = append(apiSpec.Calls, *apiCall)
 			// } else {
 
-			// 	spec.APISpecs[k].Calls[0].RequestUrlParams = apiCall.RequestUrlParams
+			// 	spec.APISpecs[k].Calls[0].RequestURIParams = apiCall.RequestURIParams
 			// 	spec.APISpecs[k].Calls[0].PostForm = apiCall.PostForm
 			// 	spec.APISpecs[k].Calls[0].ResponseBody = apiCall.ResponseBody
 			// }
 			// if len(spec.APISpecs[k].Calls) == 0 {
 			// spec.APISpecs[k].Calls = append(apiSpec.Calls, apiCall)
+			spec.APISpecs[k].Calls[apiSpec.Idx] = apiCall
 			spec.APISpecs[k].Idx++
-			spec.APISpecs[k].Calls[apiSpec.Idx] = *apiCall
 			break
 			// } else {
 			// 	spec.APISpecs[k].Calls[0] = *apiCall
@@ -142,20 +137,19 @@ func GenerateHTML(apiCall *models.ApiCall) {
 
 	if shouldAddPathSpec {
 		apiSpec := &models.APISpec{
-			Idx:      0,
-			HttpVerb: apiCall.MethodType,
-			Path:     apiCall.CurrentPath,
-			Calls:    make([]models.ApiCall, 10),
+			Idx:        0,
+			MethodType: apiCall.MethodType,
+			Path:       apiCall.CurrentPath,
+			Calls:      make([]*models.APICall, 10),
 		}
 		// apiCall.Id = atomic.AddUint64(&count, 1)
 		// apiSpec.Calls = append(apiSpec.Calls, apiCall)
-		apiSpec.Calls[0] = *apiCall
+		apiSpec.Calls[0] = apiCall
 		spec.APISpecs = append(spec.APISpecs, *apiSpec)
 	}
 	generateHTML()
-	filePath, _ := filepath.Abs(config.DocPath)
 	if b, err := json.Marshal(spec); err == nil {
-		ioutil.WriteFile(filePath+".json", b, 0664)
+		ioutil.WriteFile(dataFile, b, 0664)
 	}
 }
 
@@ -174,7 +168,7 @@ func generateHTML() {
 		})
 }
 
-func deleteCommonHeaders(call *models.ApiCall) {
+func deleteCommonHeaders(call *models.APICall) {
 	delete(call.RequestHeader, "Accept")
 	delete(call.RequestHeader, "Accept-Encoding")
 	delete(call.RequestHeader, "Accept-Language")

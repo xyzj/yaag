@@ -13,7 +13,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/xyzj/gopsu"
 	"github.com/xyzj/yaag/yaag"
 	"github.com/xyzj/yaag/yaag/models"
 )
@@ -56,7 +55,7 @@ func (y *YaagHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writer := NewResponseRecorder(w)
-	apiCall := models.ApiCall{}
+	apiCall := models.APICall{}
 	Before(&apiCall, r)
 	y.nextHandler.ServeHTTP(writer, r)
 	After(&apiCall, writer, r)
@@ -68,7 +67,7 @@ func HandleFunc(next func(http.ResponseWriter, *http.Request)) http.HandlerFunc 
 			next(w, r)
 			return
 		}
-		apiCall := models.ApiCall{}
+		apiCall := models.APICall{}
 		writer := NewResponseRecorder(w)
 		Before(&apiCall, r)
 		next(writer, r)
@@ -76,9 +75,9 @@ func HandleFunc(next func(http.ResponseWriter, *http.Request)) http.HandlerFunc 
 	})
 }
 
-func Before(apiCall *models.ApiCall, req *http.Request) {
+func Before(apiCall *models.APICall, req *http.Request) {
 	apiCall.RequestHeader = ReadHeaders(req)
-	// apiCall.RequestUrlParams = ReadQueryParams(req)
+	// apiCall.RequestURIParams = ReadQueryParams(req)
 	// val, ok := apiCall.RequestHeader["Content-Type"]
 	// if ok {
 	// 	ct := strings.TrimSpace(val)
@@ -122,7 +121,7 @@ func ReadQueryParams(req *http.Request) map[string]string {
 // 	}
 // }
 
-// func handleMultipart(apiCall *models.ApiCall, req *http.Request) {
+// func handleMultipart(apiCall *models.APICall, req *http.Request) {
 // 	apiCall.RequestHeader["Content-Type"] = "multipart/form-data"
 // 	req.ParseMultipartForm(MaxInMemoryMultipartSize)
 // 	apiCall.PostForm = ReadMultiPostForm(req.MultipartForm)
@@ -146,7 +145,7 @@ func ReadPostForm(req *http.Request) map[string]string {
 }
 
 func ReadHeaders(req *http.Request) map[string]string {
-	b := bytes.NewBuffer(gopsu.Bytes(""))
+	b := &bytes.Buffer{}
 	err := req.Header.WriteSubset(b, ReqWriteExcludeHeaderDump)
 	if err != nil {
 		return map[string]string{}
@@ -181,7 +180,7 @@ func ReadBody(req *http.Request) *string {
 			return nil
 		}
 	}
-	b := bytes.NewBuffer(gopsu.Bytes(""))
+	b := &bytes.Buffer{}
 	chunked := len(req.TransferEncoding) > 0 && req.TransferEncoding[0] == "chunked"
 	if req.Body == nil {
 		return nil
@@ -199,7 +198,7 @@ func ReadBody(req *http.Request) *string {
 	return &body
 }
 
-func After(apiCall *models.ApiCall, record *responseRecorder, r *http.Request) {
+func After(apiCall *models.APICall, record *responseRecorder, r *http.Request) {
 	if strings.Contains(r.RequestURI, ".ico") || !yaag.IsOn() {
 		return
 	}

@@ -7,28 +7,24 @@ type Spec struct {
 
 // APISpec APISpec
 type APISpec struct {
-	Idx      int
-	HttpVerb string
-	Path     string
-	Calls    []ApiCall
+	Calls      []*APICall
+	MethodType string
+	Path       string
+	Idx        int
 }
 
-// ApiCall ApiCall
-type ApiCall struct {
-	Id uint64
-
-	CurrentPath string
-	MethodType  string
-
-	PostForm map[string]string
-
+// APICall APICall
+type APICall struct {
+	PostForm             map[string]string
 	RequestHeader        map[string]string
 	CommonRequestHeaders map[string]string
 	ResponseHeader       map[string]string
-	RequestUrlParams     map[string]string
-
-	RequestBody  string
-	ResponseBody string
-	ResponseCode int
-	CallHash     string
+	RequestURIParams     map[string]string
+	RequestBody          string
+	ResponseBody         string
+	CallHash             string
+	CurrentPath          string
+	MethodType           string
+	ID                   uint64
+	ResponseCode         int
 }

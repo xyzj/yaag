@@ -25,6 +25,9 @@ const (
                 outline: 1px solid #ccc;
                 padding: 5px; margin: 5px;
             }
+            hr {
+                border-top: 5px solid #ccc;
+            }
             .string { color: green; }
             .number { color: darkorange; }
             .boolean { color: blue; }
@@ -97,7 +100,7 @@ const (
                 </div>
             <ul class="nav nav-pills nav-stacked" role="tablist">
                 {{ range $key, $value := .array }}
-                    <li role="presentation"><a href="#{{$key}}top" role="tab" data-toggle="tab">{{$value.HttpVerb}} : {{$value.Path}}</a></li>
+                    <li role="presentation"><a href="#{{$key}}top" role="tab" data-toggle="tab">{{$value.MethodType}} : {{$value.Path}}</a></li>
                 {{ end }}
             <ul>
         </div>
@@ -135,14 +138,14 @@ const (
                         {{ end }}
                     </table>
                     {{ end }}
-                    {{ if $wrapperValue.RequestUrlParams }}
+                    {{ if $wrapperValue.RequestURIParams }}
                     <p> <H4> URL Params </H4> </p>
                     <table class="table table-bordered table-striped">
                         <tr>
                             <th>Key</th>
                             <th>Value</th>
                         </tr>
-                        {{ range $key, $value := $wrapperValue.RequestUrlParams }}
+                        {{ range $key, $value := $wrapperValue.RequestURIParams }}
                         <tr>
                             <td>{{ $key }}</td>
                             <td> {{ $value }}</td>
@@ -321,7 +324,7 @@ const (
             </div>
         <ul class="nav nav-pills nav-stacked" role="tablist">
             {{ range $key, $value := .array }}
-                <li role="presentation"><a href="#{{$key}}top" role="tab" data-toggle="tab">{{$value.HttpVerb}} : {{$value.Path}}</a></li>
+                <li role="presentation"><a href="#{{$key}}top" role="tab" data-toggle="tab">{{$value.MethodType}} : {{$value.Path}}</a></li>
             {{ end }}
         <ul>
     </div>
@@ -359,14 +362,14 @@ const (
                     {{ end }}
                 </table>
                 {{ end }}
-                {{ if $wrapperValue.RequestUrlParams }}
+                {{ if $wrapperValue.RequestURIParams }}
                 <p> <H4> URL Params </H4> </p>
                 <table class="table table-bordered table-striped">
                     <tr>
                         <th>Key</th>
                         <th>Value</th>
                     </tr>
-                    {{ range $key, $value := $wrapperValue.RequestUrlParams }}
+                    {{ range $key, $value := $wrapperValue.RequestURIParams }}
                     <tr>
                         <td>{{ $key }}</td>
                         <td> {{ $value }}</td>
