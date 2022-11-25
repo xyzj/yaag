@@ -1,7 +1,5 @@
 package yaag
 
-import "github.com/xyzj/yaag/yaag/models"
-
 // Config 配置
 type Config struct {
 	BaseUrls map[string]string
@@ -13,5 +11,5 @@ type Config struct {
 
 // ResetDoc 重置
 func (c *Config) ResetDoc() {
-	spec = &models.Spec{}
+	spec = &Spec{APISpecs: make([]APISpec, 0)}
 }

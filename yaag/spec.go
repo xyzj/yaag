@@ -1,4 +1,4 @@
-package models
+package yaag
 
 // Spec Spec
 type Spec struct {
@@ -7,7 +7,7 @@ type Spec struct {
 
 // APISpec APISpec
 type APISpec struct {
-	Calls      []*APICall
+	Calls      []APICall
 	MethodType string
 	Path       string
 	Idx        int

@@ -11,18 +11,17 @@ import (
 
 	"github.com/xyzj/gopsu/json"
 	"github.com/xyzj/gopsu/loopfunc"
-	"github.com/xyzj/yaag/yaag/models"
 )
 
 var count uint64
 var config *Config
 
 // Initial empty spec
-var spec *models.Spec = &models.Spec{}
+var spec *Spec = &Spec{APISpecs: make([]APISpec, 0)}
 var htmlTemplate *template.Template
 var htmlFile string
 var dataFile string
-var chanGenHTML = make(chan *models.APICall, 1000)
+var chanGenHTML = make(chan APICall, 1000)
 
 // IsOn 是否启用
 func IsOn() bool {
@@ -31,6 +30,7 @@ func IsOn() bool {
 
 // Init 初始化
 func Init(conf *Config) {
+	defer func() { recover() }()
 	config = conf
 	// load the config file
 	if conf.DocPath == "" {
@@ -61,7 +61,18 @@ func Init(conf *Config) {
 	if err == nil {
 		json.Unmarshal(b, spec)
 	}
+	go loopfunc.LoopFunc(func(params ...interface{}) {
+		for apicall := range chanGenHTML {
+			GenerateHTML(apicall)
+		}
+	}, "genhtml", nil)
+	if spec == nil {
+		return
+	}
 	for k, v := range spec.APISpecs {
+		if v.Calls == nil {
+			continue
+		}
 		for idx, call := range v.Calls {
 			if call.RequestHeader == nil {
 				spec.APISpecs[k].Idx = idx
@@ -75,20 +86,15 @@ func Init(conf *Config) {
 	// 	generateHTML()
 	// }
 	// defer dataFile.Close()
-	go loopfunc.LoopFunc(func(params ...interface{}) {
-		for apicall := range chanGenHTML {
-			GenerateHTML(apicall)
-		}
-	}, "genhtml", nil)
 }
 
 // SetGenHTML SetGenHTML
-func SetGenHTML(apicall *models.APICall) {
+func SetGenHTML(apicall APICall) {
 	chanGenHTML <- apicall
 }
 
 // GenerateHTML 生成html
-func GenerateHTML(apiCall *models.APICall) {
+func GenerateHTML(apiCall APICall) {
 	shouldAddPathSpec := true
 	// deleteCommonHeaders(apiCall)
 	for k, apiSpec := range spec.APISpecs {
@@ -104,7 +110,7 @@ func GenerateHTML(apiCall *models.APICall) {
 			// if found {
 			// 	break
 			// }
-			if apiSpec.Idx >= 10 {
+			if spec.APISpecs[k].Idx >= 10 {
 				spec.APISpecs[k].Idx = 0
 			}
 			// apiCall.Id = atomic.AddUint64(&count, 1)
@@ -126,7 +132,7 @@ func GenerateHTML(apiCall *models.APICall) {
 			// }
 			// if len(spec.APISpecs[k].Calls) == 0 {
 			// spec.APISpecs[k].Calls = append(apiSpec.Calls, apiCall)
-			spec.APISpecs[k].Calls[apiSpec.Idx] = apiCall
+			spec.APISpecs[k].Calls[spec.APISpecs[k].Idx] = apiCall
 			spec.APISpecs[k].Idx++
 			break
 			// } else {
@@ -136,16 +142,16 @@ func GenerateHTML(apiCall *models.APICall) {
 	}
 
 	if shouldAddPathSpec {
-		apiSpec := &models.APISpec{
+		apiSpec := APISpec{
 			Idx:        0,
 			MethodType: apiCall.MethodType,
 			Path:       apiCall.CurrentPath,
-			Calls:      make([]*models.APICall, 10),
+			Calls:      make([]APICall, 10),
 		}
 		// apiCall.Id = atomic.AddUint64(&count, 1)
 		// apiSpec.Calls = append(apiSpec.Calls, apiCall)
 		apiSpec.Calls[0] = apiCall
-		spec.APISpecs = append(spec.APISpecs, *apiSpec)
+		spec.APISpecs = append(spec.APISpecs, apiSpec)
 	}
 	generateHTML()
 	if b, err := json.Marshal(spec); err == nil {
@@ -168,7 +174,7 @@ func generateHTML() {
 		})
 }
 
-func deleteCommonHeaders(call *models.APICall) {
+func deleteCommonHeaders(call *APICall) {
 	delete(call.RequestHeader, "Accept")
 	delete(call.RequestHeader, "Accept-Encoding")
 	delete(call.RequestHeader, "Accept-Language")
@@ -186,7 +192,7 @@ func deleteCommonHeaders(call *models.APICall) {
 
 // IsStatusCodeValid 检查状态码
 func IsStatusCodeValid(code int) bool {
-	if code >= 200 && code < 300 {
+	if code >= 200 && code < 300 { // || (code >= 400 && code < 500) {
 		return true
 	}
 	return false

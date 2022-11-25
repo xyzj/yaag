@@ -1,25 +1,25 @@
-package gin
+package yaaggin
 
 import (
-	"bytes"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mohae/deepcopy"
 	"github.com/xyzj/gopsu/json"
 	"github.com/xyzj/gopsu/tools"
 	"github.com/xyzj/yaag/yaag"
-	"github.com/xyzj/yaag/yaag/models"
 )
 
 var (
-// hashWorker = gopsu.GetNewCryptoWorker(gopsu.CryptoMD5)
+	// hashWorker = gopsu.GetNewCryptoWorker(gopsu.CryptoMD5)
+	skipPath = []string{"/plain/", "/rd/", "/api", "/root/", "/xgame/"}
 )
 
 // Document 生成api文档中间件
-func Document() gin.HandlerFunc {
-	b := &bytes.Buffer{}
-	emptycall := &models.APICall{
+func Document(skip ...string) gin.HandlerFunc {
+	// b := &bytes.Buffer{}
+	emptycall := yaag.APICall{
 		RequestHeader:    make(map[string]string),
 		PostForm:         make(map[string]string),
 		RequestURIParams: make(map[string]string),
@@ -27,12 +27,20 @@ func Document() gin.HandlerFunc {
 		MethodType:       "",
 		CurrentPath:      "",
 	}
+	for _, v := range skip {
+		skipPath = append(skipPath, v)
+	}
 	return func(c *gin.Context) {
-		if !yaag.IsOn() || strings.Contains(c.Request.RequestURI, "/api") {
+		if !yaag.IsOn() {
 			return
 		}
-		b.Reset()
-		apiCall := deepcopy.Copy(emptycall).(*models.APICall)
+		for _, v := range skipPath {
+			if strings.Contains(c.Request.RequestURI, v) {
+				return
+			}
+		}
+		// b.Reset()
+		apiCall := deepcopy.Copy(emptycall).(yaag.APICall)
 		apiCall.MethodType = c.Request.Method
 		apiCall.CurrentPath = strings.Split(c.Request.RequestURI, "?")[0]
 		// header
@@ -53,6 +61,7 @@ func Document() gin.HandlerFunc {
 		// }
 		// apiCall.CallHash = hashWorker.Hash([]byte(apiCall.CurrentPath + apiCall.MethodType + apiCall.RequestBody))
 		c.Next()
+		apiCall.RequestHeader["request_time"] = time.Now().Format("2006-01-02 15:04:05")
 		if c.Param("_userTokenName") != "" {
 			apiCall.RequestHeader["token_name"] = c.Param("_userTokenName")
 		}
@@ -60,7 +69,9 @@ func Document() gin.HandlerFunc {
 		if v, ok := c.Params.Get("_body"); ok {
 			apiCall.RequestBody = v
 		} else {
-			apiCall.RequestBody = "?" + strings.Split(c.Request.RequestURI, "?")[1]
+			if strings.Contains(c.Request.RequestURI, "?") {
+				apiCall.RequestBody = "?" + strings.Split(c.Request.RequestURI, "?")[1]
+			}
 		}
 		// ct := c.Request.Header.Get("Content-Type")
 		// switch ct {
