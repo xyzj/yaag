@@ -1,3 +1,4 @@
+// Package yaag 记录接口调用日志
 package yaag
 
 /*
@@ -6,7 +7,6 @@ package yaag
 import (
 	"html/template"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/xyzj/gopsu/json"
@@ -57,7 +57,7 @@ func Init(conf *Config) {
 	// }
 	dataFile = conf.DocPath + ".json"
 	htmlFile = conf.DocPath
-	b, err := ioutil.ReadFile(dataFile)
+	b, err := os.ReadFile(dataFile)
 	if err == nil {
 		json.Unmarshal(b, spec)
 	}
@@ -155,7 +155,7 @@ func GenerateHTML(apiCall APICall) {
 	}
 	generateHTML()
 	if b, err := json.Marshal(spec); err == nil {
-		ioutil.WriteFile(dataFile, b, 0664)
+		os.WriteFile(dataFile, b, 0664)
 	}
 }
 

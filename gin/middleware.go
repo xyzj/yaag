@@ -1,3 +1,4 @@
+// Package yaaggin yaag的gin中间件
 package yaaggin
 
 import (
@@ -6,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mohae/deepcopy"
+	"github.com/xyzj/gopsu"
 	"github.com/xyzj/gopsu/json"
-	"github.com/xyzj/gopsu/tools"
 	"github.com/xyzj/yaag/yaag"
 )
 
@@ -27,9 +28,7 @@ func Document(skip ...string) gin.HandlerFunc {
 		MethodType:       "",
 		CurrentPath:      "",
 	}
-	for _, v := range skip {
-		skipPath = append(skipPath, v)
-	}
+	skipPath = append(skipPath, skip...)
 	return func(c *gin.Context) {
 		if !yaag.IsOn() {
 			return
@@ -91,7 +90,7 @@ func Document(skip ...string) gin.HandlerFunc {
 				if err != nil {
 					body = ""
 				} else {
-					body = tools.String(jsonBytes)
+					body = gopsu.String(jsonBytes)
 				}
 			}
 			apiCall.ResponseBody = body
