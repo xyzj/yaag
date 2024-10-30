@@ -9,7 +9,7 @@ replace github.com/xyzj/toolbox => /config/go/src/github.com/xyzj/toolbox
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826
-	github.com/xyzj/toolbox v0.0.0-20230720055908-de5f25af4b35
+	github.com/xyzj/toolbox v0.0.0-00010101000000-000000000000
 )
 
 require (
