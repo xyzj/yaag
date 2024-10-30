@@ -9,19 +9,23 @@ import (
 	"io"
 	"os"
 
-	"github.com/xyzj/gopsu/json"
-	"github.com/xyzj/gopsu/loopfunc"
+	"github.com/xyzj/toolbox/json"
+	"github.com/xyzj/toolbox/loopfunc"
 )
 
-var count uint64
-var config *Config
+var (
+	count  uint64
+	config *Config
+)
 
 // Initial empty spec
-var spec *Spec = &Spec{APISpecs: make([]APISpec, 0)}
-var htmlTemplate *template.Template
-var htmlFile string
-var dataFile string
-var chanGenHTML = make(chan APICall, 1000)
+var (
+	spec         *Spec = &Spec{APISpecs: make([]APISpec, 0)}
+	htmlTemplate *template.Template
+	htmlFile     string
+	dataFile     string
+	chanGenHTML  = make(chan APICall, 1000)
+)
 
 // IsOn 是否启用
 func IsOn() bool {

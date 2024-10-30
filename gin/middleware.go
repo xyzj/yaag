@@ -7,15 +7,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/mohae/deepcopy"
-	"github.com/xyzj/gopsu"
-	"github.com/xyzj/gopsu/json"
+	"github.com/xyzj/toolbox/json"
 	"github.com/xyzj/yaag/yaag"
 )
 
-var (
-	// hashWorker = gopsu.GetNewCryptoWorker(gopsu.CryptoMD5)
-	skipPath = []string{"/plain/", "/rd/", "/api", "/root/", "/xgame/"}
-)
+// hashWorker = toolbox.GetNewCryptoWorker(toolbox.CryptoMD5)
+var skipPath = []string{"/plain/", "/rd/", "/api", "/root/", "/xgame/"}
 
 // Document 生成api文档中间件
 func Document(skip ...string) gin.HandlerFunc {
@@ -90,7 +87,7 @@ func Document(skip ...string) gin.HandlerFunc {
 				if err != nil {
 					body = ""
 				} else {
-					body = gopsu.String(jsonBytes)
+					body = json.String(jsonBytes)
 				}
 			}
 			apiCall.ResponseBody = body
